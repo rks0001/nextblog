@@ -2,22 +2,20 @@ import React from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
 
 async function getData() {
-  const res = await fetch("http:localhost:3000/api/posts", {
+  const res = await fetch("http://localhost:3000/api/posts", {
     cache: "no-store",
   });
 
   if (!res.ok) {
-    return notFound()
+    throw new Error("Data fetch failed");
   }
 
   return res.json();
 }
 
-const Blog = async () => {
-  const data = await getData();
+const Blog = ({ data }) => {
   return (
     <div className={styles.mainContainer}>
       {data.map((item) => (
@@ -40,5 +38,18 @@ const Blog = async () => {
     </div>
   );
 };
+
+export async function getServerSideProps() {
+  try {
+    const data = await getData();
+    return {
+      props: { data },
+    };
+  } catch (error) {
+    return {
+      notFound: true,
+    };
+  }
+}
 
 export default Blog;
